@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+    mongo-primary:
+        container_name: mongo-primary
+        image: mongo:6.0
+        networks:
+          - mongodbreplsetnetwork
+        ports:
+            - 30001:27017
+        entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "localmongoreplSet" ]
+        command: > 
+          mongosh
+          'config = {
+            "_id": "localmongoreplSet",
+            "members": [
+              { "_id": 0, "host": "127.0.0.1:30001" },
+              { "_id": 1, "host": "127.0.0.1:30002" },
+              { "_id": 2, "host": "127.0.0.1:30003", "arbiterOnly": true }
+            ]
+          }
+          rs.initiate(config)
+          '
+        volumes:
+            - ./mongodb1/data:/data/db
+    mongo-secondary:
+        container_name: mongo-secondary
+        image: mongo:6.0
+        networks:
+          - mongodbreplsetnetwork
+        ports:
+            - 30002:27017
+        entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "localmongoreplSet" ]
+        volumes:
+            - ./mongodb2/data:/data/db
+    mongo-arbiter:
+        container_name: mongo-arbiter
+        image: mongo:6.0
+        networks:
+          - mongodbreplsetnetwork
+        ports:
+            - 30003:27017
+        entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "localmongoreplSet" ]
+        volumes:
+            - ./mongo-arbiter/data:/data/db
+# use [ docker network create mongodbreplsetnetwork] เพื่อสร้าง network ขึ้นมาก่อน
+networks:
+  mongodbreplsetnetwork:
+    driver: bridge

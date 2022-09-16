@@ -1,0 +1,3 @@
+docker run -d -p 30001:27017 --net mongoreplsetnetwork --name mongo1 mongo:6.0 --replSet localmongoreplSet
+docker run -d -p 30002:27017 --net mongoreplsetnetwork --name mongo2 mongo:6.0 --replSet localmongoreplSet
+docker run -d -p 30003:27017 --net mongoreplsetnetwork --name mongo3 mongo:6.0 --replSet localmongoreplSet
